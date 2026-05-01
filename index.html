@@ -1,12 +1,602 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPA Unit 2</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPA Masterclass — Beginner to Intermediate</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #a259ff;
+    --text: #e8e8f0;
+    --muted: #7a7a9a;
+    --border: #2a2a3a;
+    --code-bg: #0d0d18;
+    --success: #00ff88;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,229,255,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(162,89,255,0.07) 0%, transparent 60%);
+  }
+  .hero-badge {
+    display: inline-block;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    padding: 0.35rem 1rem;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 1.05;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero h1 .orange { color: var(--accent2); }
+  .hero-sub {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 600px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-meta {
+    margin-top: 2.5rem;
+    display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .hero-meta span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-left: 2px solid var(--accent3);
+    padding-left: 0.8rem;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    animation: bounce 2s infinite;
+  }
+
+  /* NAV SIDEBAR */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s;
+  }
+  .sidebar a:hover { background: var(--card); color: var(--text); }
+  .sidebar a.active { color: var(--accent); background: rgba(0,229,255,0.07); }
+  .nav-toggle {
+    position: fixed; top: 1.5rem; left: 1.5rem; z-index: 200;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  .nav-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MAIN CONTENT */
+  .main { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 6rem;
+    animation: fadeUp 0.5s ease both;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  /* CONTENT BLOCKS */
+  .block { margin-bottom: 2rem; }
+  .block-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+  p { color: #c8c8d8; margin-bottom: 1rem; font-size: 0.97rem; }
+  strong { color: var(--text); }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ANALOGY BLOCK */
+  .analogy {
+    background: rgba(162,89,255,0.07);
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+  }
+  .analogy .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--accent3);
+    margin-bottom: 0.4rem;
+  }
+  .analogy p { color: var(--text); margin: 0; font-size: 0.93rem; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+  }
+  .code-block .code-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .code-block pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.83rem;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+  .kw { color: #ff79c6; }
+  .fn { color: #50fa7b; }
+  .str { color: #f1fa8c; }
+  .cm { color: #6272a4; font-style: italic; }
+  .num { color: #bd93f9; }
+  .var { color: #8be9fd; }
+
+  /* STEPS */
+  .steps { margin: 1.25rem 0; }
+  .step {
+    display: flex; gap: 1rem;
+    margin-bottom: 0.85rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .step p { margin: 0; font-size: 0.93rem; color: var(--text); }
+
+  /* INTERVIEW SECTION */
+  .interview {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 8px;
+    padding: 1.75rem;
+    margin-top: 2rem;
+  }
+  .interview-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .interview-header::before {
+    content: '◆';
+    font-size: 0.5rem;
+  }
+  .qa { margin-bottom: 1.5rem; }
+  .question {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.93rem;
+    margin-bottom: 0.5rem;
+  }
+  .answer {
+    font-size: 0.88rem;
+    color: #b0b0c8;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+  }
+
+  /* STRONG ANSWER */
+  .strong-answer {
+    background: rgba(255,107,53,0.06);
+    border: 1px solid rgba(255,107,53,0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .strong-answer .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+  }
+  .crisp {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    border-left: 3px solid var(--accent2);
+    padding-left: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* MISTAKE + PRACTICE */
+  .mistake {
+    background: rgba(255,50,50,0.06);
+    border-left: 3px solid #ff5555;
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake .label { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; color: #ff5555; margin-bottom: 0.4rem; }
+  .practice {
+    background: rgba(0,255,136,0.05);
+    border-left: 3px solid var(--success);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .practice .label { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; color: var(--success); margin-bottom: 0.4rem; }
+
+  /* VAR TYPE TABLE */
+  .var-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+  .var-table th {
+    background: var(--code-bg);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--accent);
+  }
+  .var-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: #c0c0d0;
+    font-size: 0.83rem;
+  }
+  .var-table tr:hover td { background: var(--card); }
+  .var-table code {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent3);
+    font-size: 0.8rem;
+  }
+
+  /* TAG */
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    margin: 0.15rem;
+  }
+  .tag-blue { background: rgba(0,229,255,0.1); color: var(--accent); border: 1px solid rgba(0,229,255,0.2); }
+  .tag-purple { background: rgba(162,89,255,0.1); color: var(--accent3); border: 1px solid rgba(162,89,255,0.2); }
+  .tag-orange { background: rgba(255,107,53,0.1); color: var(--accent2); border: 1px solid rgba(255,107,53,0.2); }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 3rem 0;
+  }
+
+  /* FLOWCHART ASCII */
+  .flowchart {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 2;
+    color: var(--muted);
+    margin: 1.25rem 0;
+    text-align: center;
+  }
+  .flowchart .box {
+    display: inline-block;
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 0.3rem 1rem;
+    border-radius: 4px;
+    margin: 0.1rem;
+  }
+  .flowchart .diamond {
+    display: inline-block;
+    border: 1px solid var(--accent2);
+    color: var(--text);
+    padding: 0.3rem 1rem;
+    border-radius: 4px;
+    background: rgba(255,107,53,0.06);
+    margin: 0.1rem;
+  }
+  .flowchart .arrow { color: var(--muted); font-size: 1rem; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 2.5rem; }
+    .main { padding: 2rem 1rem; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
 </head>
 <body>
-    <h1>Welcome to RPA Unit 2</h1>
-    <p>This is the main page for the RPA Unit 2 project.</p>
-</body>
-</html>
+
+<button class="nav-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ MENU</button>
+
+<nav class="sidebar">
+  <h3>COURSE MODULES</h3>
+  <a href="#intro">01. Intro to RPA</a>
+  <a href="#interface">02. Tool Interface</a>
+  <a href="#variables">03. Variables</a>
+  <a href="#arguments">04. Arguments</a>
+  <a href="#control-flow">05. Control Flow</a>
+  <a href="#activities">06. CF Activities</a>
+  <a href="#data">07. Data Manipulation</a>
+  <a href="#scraping">08. Scraping & OCR</a>
+  <a href="#exceptions">09. Exception Handling</a>
+  <a href="#deployment">10. Deployment</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">BEGINNER → INTERMEDIATE</div>
+  <h1>RPA <span>Master</span><br><span class="orange">Class</span></h1>
+  <p class="hero-sub">Robotic Process Automation — samjho, seekho, deploy karo. Hinglish mein, real code ke saath.</p>
+  <div class="hero-meta">
+    <span>UiPath Focused</span>
+    <span>VB.NET Expressions</span>
+    <span>Interview Ready</span>
+    <span>10 Modules</span>
+  </div>
+  <div class="scroll-hint">↓ SCROLL TO BEGIN</div>
+</div>
+
+<main class="main">
+
+<!-- ============================= -->
+<!-- MODULE 1: INTRO TO RPA -->
+<!-- ============================= -->
+<section class="section" id="intro">
+  <div class="section-header">
+    <span class="section-num">MODULE 01</span>
+    <h2 class="section-title">Introduction to RPA</h2>
+  </div>
+
+  <div class="block">
+    <div class="block-label">DEFINITION</div>
+    <p><strong>RPA (Robotic Process Automation)</strong> ek technology hai jo software robots (bots) use karke repetitive, rule-based computer tasks ko automatically perform karti hai — bina human involvement ke.</p>
+    <p>Simple words mein: <em>Jo kaam tum roz ek jaisa karte ho computer par — wahi bot kare tumhari jagah.</em></p>
+  </div>
+
+  <div class="analogy">
+    <div class="label">🧠 REAL-LIFE ANALOGY</div>
+    <p><strong>Sochlo ek peon ki job:</strong> Roz subah 9 baje, woh aata hai, same files uthata hai, stamp lagata hai, forward karta hai. Har din same process. Ab imagine karo ek robot peon — jo kabhi thakta nahi, kabhi galti nahi karta, 24/7 kaam karta hai. Yahi hai RPA bot.</p>
+  </div>
+
+  <div class="block">
+    <div class="block-label">WHY COMPANIES USE RPA</div>
+    <div class="card-grid">
+      <div class="card">
+        <h4>⚡ Speed</h4>
+        <p>Bot ek kaam seconds mein karta hai jisme human ko minutes lagein.</p>
+      </div>
+      <div class="card">
+        <h4>🎯 Accuracy</h4>
+        <p>Zero manual errors — data entry, copy-paste sab 100% accurate.</p>
+      </div>
+      <div class="card">
+        <h4>💰 Cost Saving</h4>
+        <p>Ek bot = multiple employees ka kaam. Operational cost drastically kam.</p>
+      </div>
+      <div class="card">
+        <h4>🔄 Scalability</h4>
+        <p>Peak time mein 10 bots run karo, slow time mein 1. Flexible scale.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label">REAL-WORLD USE CASES</div>
+
+    <div class="card">
+      <h4>🏦 Banking Automation Example</h4>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Customer loan application form aata hai email pe.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Bot automatically email open karta hai, PDF attachment download karta hai.</p></div>
+        <div class="step"><div class="step-num">3</div><p>PDF se data extract karta hai (naam, income, loan amount).</p></div>
+        <div class="step"><div class="step-num">4</div><p>Core banking system mein data enter karta hai.</p></div>
+        <div class="step"><div class="step-num">5</div><p>Eligibility check karta hai, result email karta hai applicant ko.</p></div>
+      </div>
+      <p><strong>Time saved:</strong> 2 ghante manual kaam → 4 minutes bot kaam.</p>
+    </div>
+
+    <div class="card">
+      <h4>📧 Email Automation Example</h4>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Bot inbox monitor karta hai har 5 minutes mein.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Subject line "Invoice" wale emails filter karta hai.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Attachment ko download karke Excel mein data copy karta hai.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Invoice processed hone ka confirmation email bhejta hai.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview">
+    <div class="interview-header">INTERVIEW QUESTIONS — MODULE 01</div>
+    <div class="qa">
+      <div class="question">Q1. RPA kya hai? Define karo simple words mein.</div>
+      <div class="answer">RPA (Robotic Process Automation) ek software technology hai jo rule-based, repetitive digital tasks ko automate karne ke liye software robots use karti hai. Ye UI-level automation hai — matlab bot usi tarah screen use karta hai jaise ek human operator karta hai.</div>
+    </div>
+    <div class="qa">
+      <div class="question">Q2. RPA aur traditional automation mein kya difference hai?</div>
+      <div class="answer">Traditional automation requires API integration and code-level changes in backend systems. RPA works at the UI/presentation layer — koi system change nahi chahiye. Legacy systems ke saath bhi kaam karta hai bina modification ke.</div>
+    </div>
+    <div class="qa">
+      <div class="question">Q3. RPA ke 3 main benefits batao.</div>
+      <div class="answer">1) Speed — tasks milliseconds mein complete, 2) Accuracy — zero human error, 3) Cost Efficiency — operational cost 40-70% reduce. Plus: 24/7 availability, compliance/audit trail, scalability.</div>
+    </div>
+    <div class="qa">
+      <div class="question">Q4. RPA ka use kab nahi karna chahiye?</div>
+      <div class="answer">Jab process unstructured ho (judgment required), jab data format frequently change ho, jab AI/cognitive tasks involved hoon (understanding context, natural language decisions). RPA best works for structured, rule-based, high-volume tasks.</div>
+    </div>
+  </div>
+
+  <div class="strong-answer">
+    <div class="label">◆ STRONG ANSWER — INTERVIEW READY</div>
+    <div class="crisp">"RPA is a non-invasive automation technology that uses software bots to mimic human interactions with digital systems — performing repetitive, rule-based tasks at scale without modifying existing IT infrastructure."</div>
+    <p><strong>Real-world use case:</strong> HDFC Bank ne RPA use kiya loan processing ke liye — processing time 2 days se ghatkar 4 hours ho gayi aur accuracy 99.9% ho gayi.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================= -->
+<!-- MODULE 2: TOOL INTERFACE -->
+<!-- ============================= -->
+<section class="section" id="interface">
+  <div class="section-header">
+    <span class="section-num">MODULE 02</span>
+    <h2 class="section-title">RPA Tool Interface (UiPath)</h2>
+  </div>
+
+  <div class="block">
+    <div class="block-label">OVERVIEW</div>
+    <p>UiPath Studio ek IDE (Integrated Development Environment) hai jahan tum apne automation workflows design karte ho. Iske 4 main parts hain:</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>🎛️ Activities Panel (Left)</h4>
+      <p><strong>Kya hai:</strong> Yahan sab automation building blocks hote hain — jaise Click, Type Into, Read CSV, Send Email, etc.</p>
+      <p><strong>Analogy:</strong> Ye ek toolbox hai — har tool ek specific kaam ke liye. Carpenter ka toolbox jisme hammer, screwdriver, drill — sab ready.</p>
+    </div>
+    <div class="card">
+    
